@@ -1,0 +1,1315 @@
+# 📚 Полный гайд по заданиям checkpoint-zero (Go)
+
+Все задания отсортированы по сложности (от 10% до 100%).
+
+---
+
+## 🟢 10% — Самые простые (базовая логика + условия)
+
+---
+
+### 1. `CheckNumber` — есть ли цифра в строке?
+
+**Что делает:** Принимает строку, возвращает `true` если в ней есть хотя бы одна цифра.
+
+**Ключевая идея:** Пройти по каждому символу и проверить `c >= '0' && c <= '9'`.
+
+```go
+func CheckNumber(arg string) bool {
+    for _, c := range arg {
+        if c >= '0' && c <= '9' {
+            return true
+        }
+    }
+    return false
+}
+```
+
+---
+
+### 2. `CountAlpha` — сколько букв в строке?
+
+**Что делает:** Считает количество латинских букв (a-z, A-Z).
+
+```go
+func CountAlpha(s string) int {
+    count := 0
+    for _, c := range s {
+        if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') {
+            count++
+        }
+    }
+    return count
+}
+```
+
+---
+
+### 3. `CountChar` — сколько раз символ встречается в строке?
+
+**Что делает:** Принимает строку и `rune` (символ), возвращает количество вхождений.
+
+**Важно:** Тип параметра `rune`, не `byte`. `rune` = символ Unicode.
+
+```go
+func CountChar(str string, c rune) int {
+    count := 0
+    for _, ch := range str {
+        if ch == c {
+            count++
+        }
+    }
+    return count
+}
+```
+
+---
+
+### 4. `PrintIf` — вернуть "G" или "Invalid Input"
+
+**Логика:**
+- Пустая строка → `"G\n"`
+- Длина >= 3 → `"G\n"`
+- Длина < 3 (и не пустая) → `"Invalid Input\n"`
+
+```go
+func PrintIf(str string) string {
+    if len(str) == 0 || len(str) >= 3 {
+        return "G\n"
+    }
+    return "Invalid Input\n"
+}
+```
+
+---
+
+### 5. `PrintIfNot` — обратная логика к PrintIf
+
+**Логика:**
+- Длина < 3 (включая пустую) → `"G\n"`
+- Длина >= 3 → `"Invalid Input\n"`
+
+```go
+func PrintIfNot(str string) string {
+    if len(str) < 3 {
+        return "G\n"
+    }
+    return "Invalid Input\n"
+}
+```
+
+---
+
+### 6. `RectPerimeter` — периметр прямоугольника
+
+**Формула:** `2 * (w + h)`  
+**Если один из аргументов отрицательный → вернуть -1**
+
+```go
+func RectPerimeter(w, h int) int {
+    if w < 0 || h < 0 {
+        return -1
+    }
+    return 2 * (w + h)
+}
+```
+
+---
+
+## 🟡 20% — Строки и базовые алгоритмы
+
+---
+
+### 7. `RetainFirstHalf` — первая половина строки
+
+**Логика:**
+- Пустая → пустая
+- Длина 1 → та же строка
+- Нечётная длина → округляем вниз (`len/2`)
+
+```go
+func RetainFirstHalf(str string) string {
+    return str[:len(str)/2]
+}
+// Работает для всех случаев: пустая→"", длина 1→""... нет!
+// Для длины 1: len/2 = 0, вернёт "". Но условие говорит вернуть саму строку!
+func RetainFirstHalf(str string) string {
+    if len(str) <= 1 {
+        return str
+    }
+    return str[:len(str)/2]
+}
+```
+
+---
+
+### 8. `CamelToSnakeCase` — camelCase → snake_case
+
+**Правила camelCase:**
+- Не заканчивается на заглавную
+- Нет двух заглавных подряд
+- Нет цифр и пунктуации
+
+**Алгоритм:**
+1. Проверить валидность (цифры/пунктуация → вернуть без изменений)
+2. Перед каждой заглавной буквой (кроме первой) вставить `_`
+
+```go
+func CamelToSnakeCase(s string) string {
+    // Проверка на невалидные символы
+    for _, c := range s {
+        if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            return s // не camelCase — вернуть как есть
+        }
+    }
+    // Проверка: не должно быть двух заглавных подряд
+    // Не должна заканчиваться на заглавную
+    result := ""
+    for i, c := range s {
+        if c >= 'A' && c <= 'Z' && i != 0 {
+            result += "_"
+        }
+        result += string(c)
+    }
+    return result
+}
+```
+
+---
+
+### 9. `DigitLen` — количество цифр числа в заданной системе счисления
+
+**Что делает:** Считает, сколько раз можно делить `n` на `base`, пока не получится 0.  
+Это равно количеству цифр числа в системе с основанием `base`.
+
+- base должен быть от 2 до 36, иначе вернуть -1
+- Отрицательные числа: сначала взять `abs(n)`
+
+```go
+func DigitLen(n, base int) int {
+    if base < 2 || base > 36 {
+        return -1
+    }
+    if n < 0 {
+        n = -n
+    }
+    if n == 0 {
+        return 1
+    }
+    count := 0
+    for n > 0 {
+        n /= base
+        count++
+    }
+    return count
+}
+```
+
+**Пример:** `DigitLen(100, 10)` → 100/10=10, 10/10=1, 1/10=0 → 3 шага → **3**
+
+---
+
+### 10. `FirstWord` — первое слово строки
+
+**Что делает:** Возвращает первое слово (до первого пробела) + `\n`.
+
+```go
+func FirstWord(s string) string {
+    result := ""
+    started := false
+    for _, c := range s {
+        if c == ' ' {
+            if started {
+                break
+            }
+        } else {
+            started = true
+            result += string(c)
+        }
+    }
+    return result + "\n"
+}
+```
+
+---
+
+### 11. `FishAndChips` — делимость на 2 и 3
+
+```go
+func FishAndChips(n int) string {
+    if n < 0 {
+        return "error: number is negative"
+    }
+    if n%2 == 0 && n%3 == 0 {
+        return "fish and chips"
+    } else if n%2 == 0 {
+        return "fish"
+    } else if n%3 == 0 {
+        return "chips"
+    }
+    return "error: non divisible"
+}
+```
+
+---
+
+### 12. `Gcd` — наибольший общий делитель (НОД)
+
+**Алгоритм Евклида:** `gcd(a, b) = gcd(b, a % b)` пока b ≠ 0.
+
+```go
+func Gcd(a, b uint) uint {
+    if a == 0 || b == 0 {
+        return 0
+    }
+    for b != 0 {
+        a, b = b, a%b
+    }
+    return a
+}
+```
+
+---
+
+### 13. `HashCode` — хеш строки
+
+**Формула для каждого символа:** `(ASCII + len(строки)) % 127`  
+Если результат < 32 (непечатаемый) → добавить 33.
+
+```go
+func HashCode(dec string) string {
+    result := ""
+    n := len(dec)
+    for _, c := range dec {
+        h := (int(c) + n) % 127
+        if h < 32 {
+            h += 33
+        }
+        result += string(rune(h))
+    }
+    return result
+}
+```
+
+---
+
+### 14. `LastWord` — последнее слово строки
+
+```go
+func LastWord(s string) string {
+    // Убрать пробелы в конце
+    end := len(s) - 1
+    for end >= 0 && s[end] == ' ' {
+        end--
+    }
+    start := end
+    for start >= 0 && s[start] != ' ' {
+        start--
+    }
+    if end < 0 {
+        return "\n"
+    }
+    return s[start+1:end+1] + "\n"
+}
+```
+
+---
+
+### 15. `RepeatAlpha` — повторить каждую букву по её порядку в алфавите
+
+`'a'` → 1 раз, `'b'` → 2 раза, ..., `'z'` → 26 раз. Регистр не важен для подсчёта.
+
+```go
+func RepeatAlpha(s string) string {
+    result := ""
+    for _, c := range s {
+        if c >= 'a' && c <= 'z' {
+            count := int(c-'a') + 1
+            for i := 0; i < count; i++ {
+                result += string(c)
+            }
+        } else if c >= 'A' && c <= 'Z' {
+            count := int(c-'A') + 1
+            for i := 0; i < count; i++ {
+                result += string(c)
+            }
+        } else {
+            result += string(c)
+        }
+    }
+    return result
+}
+```
+
+---
+
+## 🟠 35% — Программы (main) + строки средней сложности
+
+---
+
+### 16. `searchreplace` — заменить символ в строке
+
+**Это программа (`main`), принимает 3 аргумента: строка, старый символ, новый символ.**
+
+```go
+func main() {
+    if len(os.Args) != 4 {
+        return
+    }
+    s, old, new_ := os.Args[1], rune(os.Args[2][0]), rune(os.Args[3][0])
+    result := ""
+    for _, c := range s {
+        if c == old {
+            result += string(new_)
+        } else {
+            result += string(c)
+        }
+    }
+    fmt.Println(result)
+}
+```
+
+---
+
+### 17. `cleanstr` — очистить строку от лишних пробелов
+
+**Программа.** Убрать ведущие/хвостовые пробелы, между словами — ровно 1 пробел.
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Println()
+        return
+    }
+    words := strings.Fields(os.Args[1]) // Fields сам разбивает по пробелам/табам
+    if len(words) == 0 {
+        fmt.Println()
+        return
+    }
+    fmt.Println(strings.Join(words, " "))
+}
+```
+
+---
+
+### 18. `expandstr` — 3 пробела между словами
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        return
+    }
+    words := strings.Fields(os.Args[1])
+    if len(words) == 0 {
+        return
+    }
+    fmt.Println(strings.Join(words, "   "))
+}
+```
+
+---
+
+### 19. `FindPrevPrime` — предыдущее простое число
+
+**Что делает:** Найти наибольшее простое число ≤ n.
+
+```go
+func isPrime(n int) bool {
+    if n < 2 {
+        return false
+    }
+    for i := 2; i*i <= n; i++ {
+        if n%i == 0 {
+            return false
+        }
+    }
+    return true
+}
+
+func FindPrevPrime(nb int) int {
+    for nb >= 2 {
+        if isPrime(nb) {
+            return nb
+        }
+        nb--
+    }
+    return 0
+}
+```
+
+---
+
+### 20. `FromTo` — диапазон чисел в виде строки
+
+**Правила:**
+- Числа от 0 до 99 включительно
+- Числа < 10 с ведущим нулём: `01`, `02`, ...
+- Разделитель: `", "`
+- Если из > до — убывающий порядок
+
+```go
+func FromTo(from int, to int) string {
+    if from > 99 || from < 0 || to > 99 || to < 0 {
+        return "Invalid\n"
+    }
+    result := ""
+    step := 1
+    if from > to {
+        step = -1
+    }
+    for i := from; ; i += step {
+        if result != "" {
+            result += ", "
+        }
+        if i < 10 {
+            result += "0"
+        }
+        result += strconv.Itoa(i)
+        if i == to {
+            break
+        }
+    }
+    return result + "\n"
+}
+```
+
+---
+
+### 21. `IsCapitalized` — все ли слова начинаются с заглавной?
+
+**Слово** = последовательность символов без пробелов. Первый символ слова должен быть заглавной буквой или не-буквой.
+
+```go
+func IsCapitalized(s string) bool {
+    if s == "" {
+        return false
+    }
+    startOfWord := true
+    for _, c := range s {
+        if c == ' ' {
+            startOfWord = true
+        } else if startOfWord {
+            if c >= 'a' && c <= 'z' {
+                return false
+            }
+            startOfWord = false
+        }
+    }
+    return true
+}
+```
+
+---
+
+### 22. `Itoa` — целое число в строку (без strconv)
+
+```go
+func Itoa(n int) string {
+    if n == 0 {
+        return "0"
+    }
+    result := ""
+    negative := n < 0
+    if negative {
+        n = -n
+    }
+    for n > 0 {
+        result = string(rune('0'+n%10)) + result
+        n /= 10
+    }
+    if negative {
+        result = "-" + result
+    }
+    return result
+}
+```
+
+---
+
+### 23. `PrintMemory` — вывести память в hex + ASCII
+
+**Формат:**
+- Строки по 4 байта в hex через пробел
+- Потом все символы: печатаемые — как есть, остальные — `.`
+
+```go
+func PrintMemory(arr [10]byte) {
+    // Вывод hex по 4 байта в строке
+    for i := 0; i < 10; i++ {
+        fmt.Printf("%02x", arr[i])
+        if i%4 == 3 {
+            fmt.Println()
+        } else if i < 9 {
+            fmt.Print(" ")
+        }
+    }
+    fmt.Println()
+    // Вывод ASCII
+    for _, b := range arr {
+        if b >= 32 && b < 127 {
+            fmt.Printf("%c", b)
+        } else {
+            fmt.Print(".")
+        }
+    }
+    fmt.Println()
+}
+```
+
+---
+
+### 24. `printrevcomb` — все убывающие комбинации 3 цифр
+
+Вывести все комбинации `abc` где `a > b > c`.
+
+```go
+func main() {
+    first := true
+    for a := 9; a >= 2; a-- {
+        for b := a - 1; b >= 1; b-- {
+            for c := b - 1; c >= 0; c-- {
+                if !first {
+                    fmt.Print(", ")
+                }
+                fmt.Printf("%d%d%d", a, b, c)
+                first = false
+            }
+        }
+    }
+    fmt.Println()
+}
+```
+
+---
+
+### 25. `ThirdTimeIsACharm` — каждый третий символ
+
+Индексы: 3, 6, 9, ... (1-based) → то есть `i % 3 == 0` при нумерации с 1.
+
+```go
+func ThirdTimeIsACharm(str string) string {
+    result := ""
+    for i, c := range str {
+        if (i+1)%3 == 0 {
+            result += string(c)
+        }
+    }
+    return result + "\n"
+}
+```
+
+---
+
+### 26. `WeAreUnique` — уникальные символы в двух строках
+
+**Считает символы, которые есть только в одной из строк (без повторений).**
+
+```go
+func WeAreUnique(str1, str2 string) int {
+    if str1 == "" && str2 == "" {
+        return -1
+    }
+    seen := make(map[rune]bool)
+    inBoth := make(map[rune]bool)
+    
+    for _, c := range str1 {
+        seen[c] = true
+    }
+    for _, c := range str2 {
+        if seen[c] {
+            inBoth[c] = true
+        }
+    }
+    
+    unique := make(map[rune]bool)
+    for _, c := range str1 {
+        if !inBoth[c] {
+            unique[c] = true
+        }
+    }
+    for _, c := range str2 {
+        if !inBoth[c] {
+            unique[c] = true
+        }
+    }
+    return len(unique)
+}
+```
+
+---
+
+## 🔴 50% — Сложные строки, слайсы, алгоритмы
+
+---
+
+### 27. `ZipString` — RLE-сжатие строки
+
+`"aaabbc"` → `"3a2b1c"` (количество + символ)
+
+```go
+func ZipString(s string) string {
+    if s == "" {
+        return ""
+    }
+    result := ""
+    count := 1
+    for i := 1; i < len(s); i++ {
+        if s[i] == s[i-1] {
+            count++
+        } else {
+            result += strconv.Itoa(count) + string(s[i-1])
+            count = 1
+        }
+    }
+    result += strconv.Itoa(count) + string(s[len(s)-1])
+    return result
+}
+```
+
+---
+
+### 28. `addprimesum` — сумма всех простых чисел до N
+
+**Программа.** Ввод — одно число.
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Println(0)
+        return
+    }
+    n, err := strconv.Atoi(os.Args[1])
+    if err != nil || n <= 0 {
+        fmt.Println(0)
+        return
+    }
+    sum := 0
+    for i := 2; i <= n; i++ {
+        if isPrime(i) {
+            sum += i
+        }
+    }
+    fmt.Println(sum)
+}
+```
+
+---
+
+### 29. `CanJump` — можно ли дойти до конца массива?
+
+**Ключевой момент:** каждый элемент — это **точное** число шагов вперёд, не максимальное. Нужно строго следовать.
+
+```go
+func CanJump(nums []uint) bool {
+    if len(nums) == 0 {
+        return false
+    }
+    pos := 0
+    for pos < len(nums)-1 {
+        next := pos + int(nums[pos])
+        if next >= len(nums) {
+            return false // вышли за пределы
+        }
+        if next == pos {
+            return false // зациклились (шаг 0)
+        }
+        pos = next
+    }
+    return pos == len(nums)-1
+}
+```
+
+---
+
+### 30. `Chunk` — разбить слайс на подслайсы по size элементов
+
+```go
+func Chunk(slice []int, size int) {
+    if size == 0 {
+        fmt.Println()
+        return
+    }
+    result := [][]int{}
+    for i := 0; i < len(slice); i += size {
+        end := i + size
+        if end > len(slice) {
+            end = len(slice)
+        }
+        result = append(result, slice[i:end])
+    }
+    fmt.Println(result)
+}
+```
+
+---
+
+### 31. `ConcatAlternate` — чередовать два слайса
+
+**Начинаем с бо́льшего слайса. Если равны — с первого.**
+
+```go
+func ConcatAlternate(s1, s2 []int) []int {
+    result := []int{}
+    longer, shorter := s1, s2
+    if len(s2) > len(s1) {
+        longer, shorter = s2, s1
+    }
+    diff := len(longer) - len(shorter)
+    // Сначала лишние элементы бо́льшего
+    result = append(result, longer[:diff]...)
+    // Потом чередуем
+    for i := 0; i < len(shorter); i++ {
+        result = append(result, longer[diff+i], shorter[i])
+    }
+    return result
+}
+```
+
+---
+
+### 32. `ConcatSlice` — соединить два слайса
+
+```go
+func ConcatSlice(slice1, slice2 []int) []int {
+    return append(slice1, slice2...)
+}
+```
+
+---
+
+### 33. `fprime` — простые множители числа
+
+**Программа.** Делить число на простые множители от 2 до n.
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        return
+    }
+    n, err := strconv.Atoi(os.Args[1])
+    if err != nil || n <= 1 {
+        return
+    }
+    result := ""
+    for d := 2; d <= n; d++ {
+        for n%d == 0 {
+            if result != "" {
+                result += "*"
+            }
+            result += strconv.Itoa(d)
+            n /= d
+        }
+    }
+    fmt.Println(result)
+}
+```
+
+---
+
+### 34. `hiddenp` — скрытая подпоследовательность
+
+**s1 скрыта в s2, если символы s1 встречаются в s2 в том же порядке.**
+
+```go
+func main() {
+    if len(os.Args) != 3 {
+        return
+    }
+    s1, s2 := os.Args[1], os.Args[2]
+    j := 0
+    for i := 0; i < len(s2) && j < len(s1); i++ {
+        if s2[i] == s1[j] {
+            j++
+        }
+    }
+    if j == len(s1) {
+        fmt.Println(1)
+    } else {
+        fmt.Println(0)
+    }
+}
+```
+
+---
+
+### 35. `inter` — общие символы двух строк (без дублей)
+
+**Выводим символы, которые есть в обоих строках, в порядке появления в первой. Без повторений.**
+
+```go
+func main() {
+    if len(os.Args) != 3 {
+        return
+    }
+    s1, s2 := os.Args[1], os.Args[2]
+    inS2 := make(map[byte]bool)
+    for i := 0; i < len(s2); i++ {
+        inS2[s2[i]] = true
+    }
+    seen := make(map[byte]bool)
+    result := ""
+    for i := 0; i < len(s1); i++ {
+        c := s1[i]
+        if inS2[c] && !seen[c] {
+            result += string(c)
+            seen[c] = true
+        }
+    }
+    fmt.Println(result)
+}
+```
+
+---
+
+### 36. `reversestrcap` — последняя буква слова заглавная, остальные строчные
+
+```go
+// Для каждого слова: все буквы строчные, последняя — заглавная
+func processArg(s string) string {
+    runes := []rune(s)
+    for i, c := range runes {
+        if c >= 'A' && c <= 'Z' {
+            runes[i] = c + 32 // lowercase
+        }
+    }
+    // Найти конец каждого слова и сделать последнюю букву заглавной
+    for i := 0; i < len(runes); i++ {
+        c := runes[i]
+        if c >= 'a' && c <= 'z' {
+            // Проверить: следующий символ — пробел или конец строки
+            if i+1 == len(runes) || runes[i+1] == ' ' {
+                runes[i] = c - 32
+            }
+        }
+    }
+    return string(runes)
+}
+```
+
+---
+
+### 37. `SaveAndMiss` — чередовать сохранение и пропуск по N символов
+
+**Логика:** берём N символов, пропускаем N, берём N, пропускаем N...
+
+```go
+func SaveAndMiss(arg string, num int) string {
+    if num <= 0 {
+        return arg
+    }
+    result := ""
+    save := true
+    count := 0
+    for _, c := range arg {
+        if save {
+            result += string(c)
+        }
+        count++
+        if count == num {
+            count = 0
+            save = !save
+        }
+    }
+    return result
+}
+```
+
+---
+
+### 38. `union` — объединение символов двух строк без повторений
+
+**Вывести все уникальные символы из обеих строк в порядке появления.**
+
+```go
+func main() {
+    if len(os.Args) != 3 {
+        fmt.Println()
+        return
+    }
+    seen := make(map[rune]bool)
+    result := ""
+    for _, s := range os.Args[1:] {
+        for _, c := range s {
+            if !seen[c] {
+                seen[c] = true
+                result += string(c)
+            }
+        }
+    }
+    fmt.Println(result)
+}
+```
+
+---
+
+### 39. `wdmatch` — можно ли написать s1 символами s2 в том же порядке?
+
+```go
+func main() {
+    if len(os.Args) != 3 {
+        return
+    }
+    s1, s2 := os.Args[1], os.Args[2]
+    j := 0
+    for i := 0; i < len(s2) && j < len(s1); i++ {
+        if s2[i] == s1[j] {
+            j++
+        }
+    }
+    if j == len(s1) {
+        fmt.Println(s1)
+    }
+}
+```
+
+---
+
+## 🟣 65% — Средняя-высокая сложность
+
+---
+
+### 40. `FifthAndSkip` — каждые 5 символов разделить пробелом, 6-й удалить
+
+**Пробелы в строке игнорируются при подсчёте 5 символов.**
+
+```go
+func FifthAndSkip(str string) string {
+    if str == "" {
+        return "\n"
+    }
+    // Собрать все непробельные символы
+    chars := []rune{}
+    for _, c := range str {
+        chars = append(chars, c)
+    }
+    if len(chars) < 5 {
+        return "Invalid Input\n"
+    }
+    result := ""
+    i := 0
+    group := 0
+    skip := false
+    for i < len(chars) {
+        if chars[i] == ' ' {
+            i++
+            continue
+        }
+        if skip {
+            // пропускаем 6-й символ
+            i++
+            skip = false
+            group = 0
+            if i < len(chars) {
+                result += " "
+            }
+            continue
+        }
+        result += string(chars[i])
+        group++
+        i++
+        if group == 5 {
+            skip = true
+        }
+    }
+    return result + "\n"
+}
+```
+
+---
+
+### 41. `NotDecimal` — удалить десятичную точку, умножив на 10^n
+
+**Примеры:** `"0.1"` → `"1"`, `"174.2"` → `"1742"`, `"1952"` → `"1952"`
+
+```go
+func NotDecimal(dec string) string {
+    if dec == "" {
+        return "\n"
+    }
+    dotIdx := strings.Index(dec, ".")
+    if dotIdx == -1 {
+        return dec + "\n"
+    }
+    // Всё что после точки
+    after := dec[dotIdx+1:]
+    // Убрать trailing zeros
+    for len(after) > 0 && after[len(after)-1] == '0' {
+        after = after[:len(after)-1]
+    }
+    if after == "" {
+        return dec[:dotIdx] + "\n"
+    }
+    // Проверить что after содержит только цифры
+    for _, c := range after {
+        if c < '0' || c > '9' {
+            return dec + "\n"
+        }
+    }
+    return dec[:dotIdx] + after + "\n"
+}
+```
+
+---
+
+### 42. `RevConcatAlternate` — чередовать два слайса в обратном порядке
+
+Аналогично `ConcatAlternate`, но элементы берём с конца.
+
+---
+
+## 🔴 75-85% — Высокая сложность
+
+---
+
+### 43. `FindPairs` — найти пары с заданной суммой
+
+**Программа.** Парсинг входных данных `"[1, 2, 3]"` и поиск пар.
+
+**Ключевые проверки:** валидный формат `[...]`, числа, target — одно число.
+
+---
+
+### 44. `revwstr` — слова строки в обратном порядке
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        return
+    }
+    words := strings.Fields(os.Args[1])
+    for i, j := 0, len(words)-1; i < j; i, j = i+1, j-1 {
+        words[i], words[j] = words[j], words[i]
+    }
+    fmt.Println(strings.Join(words, " "))
+}
+```
+
+---
+
+### 45. `rostring` — повернуть строку на одно слово влево
+
+**Первое слово перемещается в конец.**
+
+```go
+func main() {
+    if len(os.Args) != 2 {
+        fmt.Println()
+        return
+    }
+    words := strings.Fields(os.Args[1])
+    if len(words) == 0 {
+        fmt.Println()
+        return
+    }
+    words = append(words[1:], words[0])
+    fmt.Println(strings.Join(words, " "))
+}
+```
+
+---
+
+### 46. `WordFlip` — слова в обратном порядке
+
+```go
+func WordFlip(str string) string {
+    words := strings.Fields(str)
+    if len(words) == 0 {
+        return "Invalid Output"
+    }
+    for i, j := 0, len(words)-1; i < j; i, j = i+1, j-1 {
+        words[i], words[j] = words[j], words[i]
+    }
+    return strings.Join(words, " ") + "\n"
+}
+```
+
+---
+
+### 47. `ItoaBase` — число в строку с заданным основанием
+
+```go
+func ItoaBase(value, base int) string {
+    if value == 0 {
+        return "0"
+    }
+    digits := "0123456789ABCDEF"
+    negative := value < 0
+    if negative {
+        value = -value
+    }
+    result := ""
+    for value > 0 {
+        result = string(digits[value%base]) + result
+        value /= base
+    }
+    if negative {
+        result = "-" + result
+    }
+    return result
+}
+```
+
+---
+
+### 48. `options` — битовый флаг для опций командной строки
+
+**Каждая буква a-z соответствует биту (a=бит 0, z=бит 25).**  
+`-h` в начале → вывести все опции. Аргументы без `-` или с неверными символами → "Invalid Option".
+
+---
+
+### 49. `piglatin` — преобразование в Pig Latin
+
+**Правила:**
+- Слово с гласной → добавить "ay"
+- Слово с согласных → перенести согласные в конец + "ay"
+- Нет гласных → "No vowels"
+
+```go
+func toPigLatin(word string) string {
+    vowels := "aeiouAEIOU"
+    if strings.ContainsRune(vowels, rune(word[0])) {
+        return word + "ay"
+    }
+    for i, c := range word {
+        if strings.ContainsRune(vowels, c) {
+            return word[i:] + word[:i] + "ay"
+        }
+    }
+    return "No vowels"
+}
+```
+
+---
+
+## ⚫ 95-100% — Самые сложные
+
+---
+
+### 50. `romannumbers` — число → римские цифры с расчётом
+
+**Таблица значений:** 1000(M), 900(CM), 500(D), 400(CD), 100(C), 90(XC), 50(L), 40(XL), 10(X), 9(IX), 5(V), 4(IV), 1(I)
+
+Для расчёта нужно показывать сложение/вычитание в формате `M+M+...+(M-C)+...`
+
+---
+
+### 51. `brackets` — проверить правильность скобок
+
+**Алгоритм:** стек. При открывающей скобке — push, при закрывающей — pop и проверить соответствие.
+
+```go
+func isBalanced(s string) bool {
+    stack := []rune{}
+    pairs := map[rune]rune{')': '(', ']': '[', '}': '{'}
+    for _, c := range s {
+        if c == '(' || c == '[' || c == '{' {
+            stack = append(stack, c)
+        } else if c == ')' || c == ']' || c == '}' {
+            if len(stack) == 0 || stack[len(stack)-1] != pairs[c] {
+                return false
+            }
+            stack = stack[:len(stack)-1]
+        }
+    }
+    return len(stack) == 0
+}
+```
+
+---
+
+### 52. `rpncalc` — калькулятор обратной польской нотации
+
+**Алгоритм:** стек чисел.
+- Если число → push
+- Если оператор → pop два числа, применить операцию, push результат
+- В конце должно остаться ровно одно число
+
+```go
+// Псевдокод алгоритма:
+stack := []int{}
+for каждый токен в строке:
+    if токен == число:
+        push(токен)
+    else if токен == оператор:
+        b = pop()
+        a = pop()
+        push(a op b)
+    else:
+        print("Error"); return
+if len(stack) != 1:
+    print("Error")
+else:
+    print(stack[0])
+```
+
+---
+
+### 53. `brainfuck` — интерпретатор языка Brainfuck
+
+**Команды:**
+- `>` / `<` — двигать указатель вправо/влево
+- `+` / `-` — увеличить/уменьшить байт
+- `.` — вывести символ
+- `[` — если байт = 0, прыгнуть за соответствующий `]`
+- `]` — если байт ≠ 0, прыгнуть за соответствующий `[`
+
+```go
+// Алгоритм:
+mem := [2048]byte{}
+ptr := 0   // указатель в памяти
+ip := 0    // указатель инструкций
+
+for ip < len(code):
+    switch code[ip]:
+    case '>': ptr++
+    case '<': ptr--
+    case '+': mem[ptr]++
+    case '-': mem[ptr]--
+    case '.': print(mem[ptr])
+    case '[':
+        if mem[ptr] == 0: прыгнуть за парный ']'
+    case ']':
+        if mem[ptr] != 0: прыгнуть за парный '['
+    ip++
+```
+
+**Хитрость для поиска пар `[` и `]`:** предвычислить таблицу соответствий заранее.
+
+---
+
+### 54. `grouping` — регулярные выражения с `|`
+
+**Принимает паттерн `(a|b)` и строку. Находит все слова, содержащие символы из паттерна.**
+
+---
+
+## 💡 Общие советы для Go
+
+```go
+// Часто нужные импорты:
+import (
+    "fmt"
+    "os"
+    "strings"
+    "strconv"
+    "unicode"
+)
+
+// Перебор символов строки — всегда range (даёт rune):
+for i, c := range str { ... }
+
+// Перебор как байты:
+for i := 0; i < len(str); i++ { b := str[i] }
+
+// Map для подсчёта уникальных:
+seen := make(map[rune]bool)
+
+// strings.Fields — разбить по пробелам (удаляет пустые):
+words := strings.Fields(str)
+
+// Аргументы программы:
+os.Args[0] // имя программы
+os.Args[1] // первый аргумент
+len(os.Args) // количество (включая имя программы)
+```

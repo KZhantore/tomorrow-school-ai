@@ -1,0 +1,1003 @@
+// ============================================================
+// CHECKPOINT-ZERO — ALL SOLUTIONS IN ONE FILE
+// Язык: Go  |  Запуск: go run checkpoint_zero_solutions.go
+// ============================================================
+package main
+
+import (
+	"fmt"
+	"math"
+	"os"
+	"strconv"
+	"strings"
+	"unicode"
+)
+
+// ─────────────────────────────────────────────
+// HELPER: run a named exercise from main()
+// ─────────────────────────────────────────────
+
+// ============================================================
+// 5% — TRIVIAL PRINT PROGRAMS
+// ============================================================
+
+// only1 — prints "1"
+func Only1() { fmt.Println("1") }
+
+// onlya — prints "a"
+func Onlya() { fmt.Println("a") }
+
+// onlyb — prints "B"
+func Onlyb() { fmt.Println("B") }
+
+// onlyf — prints "f"
+func Onlyf() { fmt.Println("f") }
+
+// onlyz — prints "z"
+func Onlyz() { fmt.Println("z") }
+
+// ============================================================
+// 10% FUNCTIONS
+// ============================================================
+
+// checknumber — returns true if string contains a digit
+func CheckNumber(arg string) bool {
+	for _, c := range arg {
+		if c >= '0' && c <= '9' {
+			return true
+		}
+	}
+	return false
+}
+
+// countalpha — count alphabetic characters
+func CountAlpha(s string) int {
+	count := 0
+	for _, c := range s {
+		if unicode.IsLetter(c) {
+			count++
+		}
+	}
+	return count
+}
+
+// countcharacter — count occurrences of rune c in str
+func CountChar(str string, c rune) int {
+	count := 0
+	for _, ch := range str {
+		if ch == c {
+			count++
+		}
+	}
+	return count
+}
+
+// printif — "G\n" if len >= 3 or empty, else "Invalid Input\n"
+func PrintIf(str string) string {
+	if len(str) == 0 || len(str) >= 3 {
+		return "G\n"
+	}
+	return "Invalid Input\n"
+}
+
+// printifnot — "G\n" if len < 3 (including empty), else "Invalid Input\n"
+func PrintIfNot(str string) string {
+	if len(str) < 3 {
+		return "G\n"
+	}
+	return "Invalid Input\n"
+}
+
+// rectperimeter — 2*(w+h), -1 if negative
+func RectPerimeter(w, h int) int {
+	if w < 0 || h < 0 {
+		return -1
+	}
+	return 2 * (w + h)
+}
+
+// retainfirsthalf — first half (round down)
+func RetainFirstHalf(str string) string {
+	if len(str) == 0 {
+		return ""
+	}
+	return str[:len(str)/2]
+}
+
+// ============================================================
+// 20% FUNCTIONS
+// ============================================================
+
+// cameltosnakecase — CamelCase → snake_case
+func CamelToSnakeCase(s string) string {
+	if s == "" {
+		return s
+	}
+	// Validate camelCase rules
+	// No digits/punctuation, no two consecutive uppercase, must not end uppercase
+	for _, c := range s {
+		if !unicode.IsLetter(c) {
+			return s
+		}
+	}
+	runes := []rune(s)
+	n := len(runes)
+	// No two consecutive uppercase
+	for i := 1; i < n; i++ {
+		if unicode.IsUpper(runes[i]) && unicode.IsUpper(runes[i-1]) {
+			return s
+		}
+	}
+	// Must not end with uppercase
+	if unicode.IsUpper(runes[n-1]) {
+		return s
+	}
+	var result []rune
+	for i, c := range runes {
+		if unicode.IsUpper(c) && i != 0 {
+			result = append(result, '_')
+		}
+		result = append(result, unicode.ToLower(c))
+	}
+	return string(result)
+}
+
+// digitlen — count digits in a number (Java exercise but implement in Go for practice)
+func DigitLen(number int64) int {
+	if number == 0 {
+		return 1
+	}
+	if number < 0 {
+		number = -number
+	}
+	count := 0
+	for number > 0 {
+		count++
+		number /= 10
+	}
+	return count
+}
+
+// firstword — return first word followed by \n
+func FirstWord(s string) string {
+	words := strings.Fields(s)
+	if len(words) == 0 {
+		return "\n"
+	}
+	return words[0] + "\n"
+}
+
+// fishandchips
+func FishAndChips(n int) string {
+	if n < 0 {
+		return "error: number is negative"
+	}
+	byTwo := n%2 == 0
+	byThree := n%3 == 0
+	if byTwo && byThree {
+		return "fish and chips"
+	} else if byTwo {
+		return "fish"
+	} else if byThree {
+		return "chips"
+	}
+	return "error: non divisible"
+}
+
+// gcd — greatest common divisor
+func Gcd(a, b uint) uint {
+	if a == 0 || b == 0 {
+		return 0
+	}
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+// hashcode
+func HashCode(dec string) string {
+	n := len(dec)
+	result := make([]byte, n)
+	for i := 0; i < n; i++ {
+		val := (int(dec[i]) + n) % 127
+		if val < 32 {
+			val += 33
+		}
+		result[i] = byte(val)
+	}
+	return string(result)
+}
+
+// lastword — last word followed by \n
+func LastWord(s string) string {
+	words := strings.Fields(s)
+	if len(words) == 0 {
+		return "\n"
+	}
+	return words[len(words)-1] + "\n"
+}
+
+// repeatalpha — repeat each alpha char by its 1-based index
+func RepeatAlpha(s string) string {
+	var result strings.Builder
+	for _, c := range s {
+		if unicode.IsLetter(c) {
+			lower := unicode.ToLower(c)
+			idx := int(lower-'a') + 1
+			for i := 0; i < idx; i++ {
+				result.WriteRune(c)
+			}
+		} else {
+			result.WriteRune(c)
+		}
+	}
+	return result.String()
+}
+
+// searchreplace — program: replace char in string (handled in RunSearchReplace)
+func SearchReplace(s, from, to string) string {
+	if len(from) != 1 || len(to) != 1 {
+		return s
+	}
+	return strings.ReplaceAll(s, from, to)
+}
+
+// ============================================================
+// 35% FUNCTIONS
+// ============================================================
+
+// cleanstr — normalise spaces
+func CleanStr(s string) string {
+	return strings.Join(strings.Fields(s), " ")
+}
+
+// expandstr — three spaces between words
+func ExpandStr(s string) string {
+	return strings.Join(strings.Fields(s), "   ")
+}
+
+// findprevprime — first prime <= nb
+func IsPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func FindPrevPrime(nb int) int {
+	for nb >= 2 {
+		if IsPrime(nb) {
+			return nb
+		}
+		nb--
+	}
+	return 0
+}
+
+// fromto — range string with zero-padding
+func FromTo(from int, to int) string {
+	if from < 0 || from > 99 || to < 0 || to > 99 {
+		return "Invalid\n"
+	}
+	var parts []string
+	if from <= to {
+		for i := from; i <= to; i++ {
+			parts = append(parts, fmt.Sprintf("%02d", i))
+		}
+	} else {
+		for i := from; i >= to; i-- {
+			parts = append(parts, fmt.Sprintf("%02d", i))
+		}
+	}
+	return strings.Join(parts, ", ") + "\n"
+}
+
+// iscapitalized
+func IsCapitalized(s string) bool {
+	if s == "" {
+		return false
+	}
+	words := strings.Fields(s)
+	for _, w := range words {
+		for _, c := range w {
+			if unicode.IsLetter(c) {
+				if unicode.IsLower(c) {
+					return false
+				}
+				break
+			}
+		}
+	}
+	return true
+}
+
+// itoa — int to string
+func Itoa(n int) string {
+	return strconv.Itoa(n)
+}
+
+// printmemory — hex dump + ASCII
+func PrintMemory(arr [10]byte) {
+	for i := 0; i < 10; i += 4 {
+		end := i + 4
+		if end > 10 {
+			end = 10
+		}
+		var parts []string
+		for j := i; j < end; j++ {
+			parts = append(parts, fmt.Sprintf("%02x", arr[j]))
+		}
+		fmt.Println(strings.Join(parts, " "))
+	}
+	for _, b := range arr {
+		if b >= 32 && b <= 126 {
+			fmt.Printf("%c", b)
+		} else {
+			fmt.Print(".")
+		}
+	}
+	fmt.Println()
+}
+
+// printrevcomb — all descending 3-digit combos (a>b>c)
+func PrintRevComb() {
+	first := true
+	for a := 9; a >= 2; a-- {
+		for b := a - 1; b >= 1; b-- {
+			for c := b - 1; c >= 0; c-- {
+				if !first {
+					fmt.Print(", ")
+				}
+				fmt.Printf("%d%d%d", a, b, c)
+				first = false
+			}
+		}
+	}
+	fmt.Println()
+}
+
+// thirdtimeisacharm — every 3rd character (index 2,5,8,...)
+func ThirdTimeIsACharm(str string) string {
+	var result strings.Builder
+	runes := []rune(str)
+	for i := 2; i < len(runes); i += 3 {
+		result.WriteRune(runes[i])
+	}
+	return result.String() + "\n"
+}
+
+// weareunique — chars not in both strings (no duplicates)
+func WeAreUnique(str1, str2 string) int {
+	if str1 == "" && str2 == "" {
+		return -1
+	}
+	set1 := make(map[rune]bool)
+	set2 := make(map[rune]bool)
+	for _, c := range str1 {
+		set1[c] = true
+	}
+	for _, c := range str2 {
+		set2[c] = true
+	}
+	unique := make(map[rune]bool)
+	for c := range set1 {
+		if !set2[c] {
+			unique[c] = true
+		}
+	}
+	for c := range set2 {
+		if !set1[c] {
+			unique[c] = true
+		}
+	}
+	return len(unique)
+}
+
+// zipstring — run-length encode
+func ZipString(s string) string {
+	if s == "" {
+		return s
+	}
+	var result strings.Builder
+	runes := []rune(s)
+	i := 0
+	for i < len(runes) {
+		c := runes[i]
+		count := 1
+		for i+count < len(runes) && runes[i+count] == c {
+			count++
+		}
+		result.WriteString(strconv.Itoa(count))
+		result.WriteRune(c)
+		i += count
+	}
+	return result.String()
+}
+
+// ============================================================
+// 50% FUNCTIONS
+// ============================================================
+
+// addprimesum — sum of primes <= n (program)
+func AddPrimeSum(n int) int {
+	if n < 2 {
+		return 0
+	}
+	sum := 0
+	for i := 2; i <= n; i++ {
+		if IsPrime(i) {
+			sum += i
+		}
+	}
+	return sum
+}
+
+// canjump — can reach end following exact steps
+func CanJump(nums []uint) bool {
+	if len(nums) == 0 {
+		return false
+	}
+	if len(nums) == 1 {
+		return true
+	}
+	pos := 0
+	for pos < len(nums)-1 {
+		step := int(nums[pos])
+		next := pos + step
+		if next >= len(nums) {
+			return false
+		}
+		if next == len(nums)-1 {
+			return true
+		}
+		pos = next
+	}
+	return pos == len(nums)-1
+}
+
+// chunk — split slice into sub-slices of given size
+func Chunk(slice []int, size int) {
+	if size == 0 {
+		fmt.Println()
+		return
+	}
+	if len(slice) == 0 {
+		fmt.Println("[]")
+		return
+	}
+	var chunks [][]int
+	for i := 0; i < len(slice); i += size {
+		end := i + size
+		if end > len(slice) {
+			end = len(slice)
+		}
+		chunks = append(chunks, slice[i:end])
+	}
+	fmt.Println(chunks)
+}
+
+// concatalternate — alternate two slices, larger first
+func ConcatAlternate(slice1, slice2 []int) []int {
+	var result []int
+	l1, l2 := len(slice1), len(slice2)
+	i, j := 0, 0
+
+	if l1 >= l2 {
+		// Equal or slice1 larger: interleave s1,s2,s1,s2... then append rest of s1
+		for i < l1 || j < l2 {
+			if i < l1 {
+				result = append(result, slice1[i])
+				i++
+			}
+			if j < l2 {
+				result = append(result, slice2[j])
+				j++
+			}
+		}
+	} else {
+		// slice2 larger: interleave s2,s1,s2,s1... then append rest of s2
+		for i < l1 || j < l2 {
+			if j < l2 {
+				result = append(result, slice2[j])
+				j++
+			}
+			if i < l1 {
+				result = append(result, slice1[i])
+				i++
+			}
+		}
+	}
+	return result
+}
+
+// concatslice
+func ConcatSlice(slice1, slice2 []int) []int {
+	result := make([]int, 0, len(slice1)+len(slice2))
+	result = append(result, slice1...)
+	result = append(result, slice2...)
+	return result
+}
+
+// fprime — prime factorisation (program)
+func FPrime(n int) string {
+	if n <= 1 {
+		return ""
+	}
+	var factors []string
+	for i := 2; i*i <= n; i++ {
+		for n%i == 0 {
+			factors = append(factors, strconv.Itoa(i))
+			n /= i
+		}
+	}
+	if n > 1 {
+		factors = append(factors, strconv.Itoa(n))
+	}
+	return strings.Join(factors, "*")
+}
+
+// hiddenp — is s1 a subsequence of s2
+func HiddenP(s1, s2 string) bool {
+	j := 0
+	for i := 0; i < len(s2) && j < len(s1); i++ {
+		if s2[i] == s1[j] {
+			j++
+		}
+	}
+	return j == len(s1)
+}
+
+// inter — chars in both strings (no doubles), order of first
+func Inter(s1, s2 string) string {
+	inS2 := make(map[rune]bool)
+	for _, c := range s2 {
+		inS2[c] = true
+	}
+	seen := make(map[rune]bool)
+	var result strings.Builder
+	for _, c := range s1 {
+		if inS2[c] && !seen[c] {
+			seen[c] = true
+			result.WriteRune(c)
+		}
+	}
+	return result.String()
+}
+
+// reversestrcap — last letter upper, rest lower (per word)
+func ReverseStrCap(s string) string {
+	words := strings.Split(s, " ")
+	for wi, w := range words {
+		runes := []rune(w)
+		// Find last alpha
+		lastAlpha := -1
+		for i := len(runes) - 1; i >= 0; i-- {
+			if unicode.IsLetter(runes[i]) {
+				lastAlpha = i
+				break
+			}
+		}
+		for i, c := range runes {
+			if unicode.IsLetter(c) {
+				if i == lastAlpha {
+					runes[i] = unicode.ToUpper(c)
+				} else {
+					runes[i] = unicode.ToLower(c)
+				}
+			}
+		}
+		words[wi] = string(runes)
+	}
+	return strings.Join(words, " ")
+}
+
+// saveandmiss — save first N, miss next N, repeat
+func SaveAndMiss(arg string, num int) string {
+	if num <= 0 {
+		return arg
+	}
+	var result strings.Builder
+	save := true
+	count := 0
+	for _, c := range arg {
+		if save {
+			result.WriteRune(c)
+		}
+		count++
+		if count == num {
+			count = 0
+			save = !save
+		}
+	}
+	return result.String()
+}
+
+// union — chars from s1 and s2 without duplicates, in order
+func Union(s1, s2 string) string {
+	seen := make(map[rune]bool)
+	var result strings.Builder
+	for _, c := range s1 + s2 {
+		if !seen[c] {
+			seen[c] = true
+			result.WriteRune(c)
+		}
+	}
+	return result.String()
+}
+
+// wdmatch — can s1 be formed from s2 chars in order
+func WdMatch(s1, s2 string) bool {
+	j := 0
+	for i := 0; i < len(s2) && j < len(s1); i++ {
+		if s2[i] == s1[j] {
+			j++
+		}
+	}
+	return j == len(s1)
+}
+
+// ============================================================
+// 65% FUNCTIONS
+// ============================================================
+
+// fifthandskip — every 5 chars (skip spaces to count) separated by space, remove 6th
+func FifthAndSkip(str string) string {
+	if str == "" {
+		return "\n"
+	}
+	// Count non-space chars to determine length
+	nonSpace := 0
+	for _, c := range str {
+		if c != ' ' {
+			nonSpace++
+		}
+	}
+	if nonSpace < 5 {
+		return "Invalid Input\n"
+	}
+
+	// Build groups: collect 5 non-space chars, then skip 1 non-space
+	var groups []string
+	var current strings.Builder
+	count := 0 // non-space count in current group
+	skipping := false
+	skipCount := 0
+
+	for _, c := range str {
+		if c == ' ' {
+			continue
+		}
+		if skipping {
+			skipCount++
+			if skipCount == 1 {
+				skipping = false
+				skipCount = 0
+				// start new group
+				current.Reset()
+				count = 0
+				current.WriteRune(c)
+				count++
+			}
+			continue
+		}
+		current.WriteRune(c)
+		count++
+		if count == 5 {
+			groups = append(groups, current.String())
+			current.Reset()
+			count = 0
+			skipping = true
+		}
+	}
+	if current.Len() > 0 {
+		groups = append(groups, current.String())
+	}
+	return strings.Join(groups, " ") + "\n"
+}
+
+// notdecimal — remove decimal point by multiplying
+func NotDecimal(dec string) string {
+	dec = strings.TrimSpace(dec)
+	if dec == "" {
+		return "\n"
+	}
+	dotIdx := strings.Index(dec, ".")
+	if dotIdx == -1 {
+		return dec + "\n"
+	}
+	intPart := dec[:dotIdx]
+	fracPart := dec[dotIdx+1:]
+
+	// Check if all chars are digits (or leading minus for intPart)
+	checkStr := intPart
+	if len(checkStr) > 0 && checkStr[0] == '-' {
+		checkStr = checkStr[1:]
+	}
+	for _, c := range checkStr {
+		if !unicode.IsDigit(c) {
+			return dec + "\n"
+		}
+	}
+	for _, c := range fracPart {
+		if !unicode.IsDigit(c) {
+			return dec + "\n"
+		}
+	}
+
+	// Remove trailing zeros from fracPart
+	trimFrac := strings.TrimRight(fracPart, "0")
+	if trimFrac == "" {
+		return intPart + "\n"
+	}
+
+	// Combine int and frac without dot
+	negative := false
+	numStr := intPart
+	if len(numStr) > 0 && numStr[0] == '-' {
+		negative = true
+		numStr = numStr[1:]
+	}
+	combined := numStr + trimFrac
+	// Remove leading zeros
+	combined = strings.TrimLeft(combined, "0")
+	if combined == "" {
+		combined = "0"
+	}
+	if negative {
+		combined = "-" + combined
+	}
+	return combined + "\n"
+}
+
+// revconcatalternate — reverse alternate two slices (largest elements first from back)
+func RevConcatAlternate(slice1, slice2 []int) []int {
+	l1, l2 := len(slice1), len(slice2)
+	i, j := l1-1, l2-1
+	var result []int
+
+	if l1 >= l2 {
+		// equal or slice1 longer: start with slice1
+		for i >= 0 || j >= 0 {
+			if i >= 0 {
+				result = append(result, slice1[i])
+				i--
+			}
+			if j >= 0 {
+				result = append(result, slice2[j])
+				j--
+			}
+		}
+	} else {
+		// slice2 longer: drain extra from slice2 first
+		extra := l2 - l1
+		for k := l2 - 1; k >= extra; k-- {
+			_ = k // will be handled below
+		}
+		// Actually: interleave from the right, starting from the longer side
+		for i >= 0 || j >= 0 {
+			if j >= 0 && (j-i) > 0 {
+				result = append(result, slice2[j])
+				j--
+			} else {
+				if i >= 0 {
+					result = append(result, slice1[i])
+					i--
+				}
+				if j >= 0 {
+					result = append(result, slice2[j])
+					j--
+				}
+			}
+		}
+	}
+	return result
+}
+
+// ============================================================
+// 75% FUNCTIONS
+// ============================================================
+
+// findpairs — find index pairs summing to target
+func FindPairs(arr []int, target int) [][]int {
+	var pairs [][]int
+	used := make([]bool, len(arr))
+	for i := 0; i < len(arr); i++ {
+		if used[i] {
+			continue
+		}
+		for j := i + 1; j < len(arr); j++ {
+			if used[j] {
+				continue
+			}
+			if arr[i]+arr[j] == target {
+				pairs = append(pairs, []int{i, j})
+				used[i] = true
+				used[j] = true
+				break
+			}
+		}
+	}
+	return pairs
+}
+
+// revwstr — reverse words (alphanumeric only)
+func RevWStr(s string) string {
+	words := strings.FieldsFunc(s, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	})
+	for i, j := 0, len(words)-1; i < j; i, j = i+1, j-1 {
+		words[i], words[j] = words[j], words[i]
+	}
+	return strings.Join(words, " ")
+}
+
+// rostring — rotate string one word to the left
+func RoString(s string) string {
+	words := strings.Fields(s)
+	if len(words) == 0 {
+		return ""
+	}
+	if len(words) == 1 {
+		return words[0]
+	}
+	return strings.Join(append(words[1:], words[0]), " ")
+}
+
+// wordflip — reverse word order
+func WordFlip(str string) string {
+	fields := strings.Fields(str)
+	if len(fields) == 0 {
+		if str == "" {
+			return "Invalid Output"
+		}
+		return "\n"
+	}
+	for i, j := 0, len(fields)-1; i < j; i, j = i+1, j-1 {
+		fields[i], fields[j] = fields[j], fields[i]
+	}
+	return strings.Join(fields, " ") + "\n"
+}
+
+// ============================================================
+// 85% FUNCTIONS
+// ============================================================
+
+// itoabase — convert int to string in given base (2-16)
+func ItoaBase(value, base int) string {
+	if base < 2 || base > 16 {
+		return ""
+	}
+	if value == 0 {
+		return "0"
+	}
+	digits := "0123456789ABCDEF"
+	negative := value < 0
+	if negative {
+		value = -value
+	}
+	var result []byte
+	for value > 0 {
+		result = append([]byte{digits[value%base]}, result...)
+		value /= base
+	}
+	if negative {
+		result = append([]byte{'-'}, result...)
+	}
+	return string(result)
+}
+
+// options — parse -xyz flags into a 32-bit int, print as bytes
+func Options(args []string) {
+	if len(args) == 0 {
+		fmt.Println("options: abcdefghijklmnopqrstuvwxyz")
+		return
+	}
+	var flags uint32
+	printHelp := false
+
+	for _, arg := range args {
+		if len(arg) < 2 || arg[0] != '-' {
+			fmt.Println("Invalid Option")
+			return
+		}
+		for _, c := range arg[1:] {
+			if c == 'h' {
+				printHelp = true
+			} else if c >= 'a' && c <= 'z' {
+				flags |= 1 << uint(c-'a')
+			} else {
+				fmt.Println("Invalid Option")
+				return
+			}
+		}
+		if printHelp {
+			break
+		}
+	}
+
+	if printHelp {
+		fmt.Println("options: abcdefghijklmnopqrstuvwxyz")
+		return
+	}
+
+	fmt.Printf("%08b %08b %08b %08b\n",
+		(flags>>24)&0xFF,
+		(flags>>16)&0xFF,
+		(flags>>8)&0xFF,
+		flags&0xFF)
+}
+
+// piglatin
+func PigLatin(word string) string {
+	vowels := "aeiouAEIOU"
+	if len(word) == 0 {
+		return word
+	}
+	if strings.ContainsRune(vowels, rune(word[0])) {
+		return word + "ay"
+	}
+	// Find first vowel
+	firstVowel := -1
+	for i, c := range word {
+		if strings.ContainsRune(vowels, c) {
+			firstVowel = i
+			break
+		}
+	}
+	if firstVowel == -1 {
+		return "No vowels"
+	}
+	return word[firstVowel:] + word[:firstVowel] + "ay"
+}
+
+// romannumbers — int to roman numeral with calculation string
+func ToRoman(n int) (string, string) {
+	if n <= 0 || n > 3999 {
+		return "", "ERROR: cannot convert to roman digit"
+	}
+
+	type romanVal struct {
+		value  int
+		symbol string
+		base   string // for subtraction notation display
+		sub    string
+	}
+
+	vals := []struct {
+		val    int
+		sym    string
+		dispSym string
+	}{
+		{1000, "M", "M"},
+		{900, "CM", "(M-C)"},
+		{500, "D", "D"},
+		{400, "CD", "(D-C)"},
+		{100, "C", "C"},
+		{90, "XC", "(C-X)"},
+		{50, "L", "L"},
+		{40, "XL", "(L-X)"},
+		{10, "X", "X"},
+		{9, "IX", "(X-I)"},
+		{5, "V", "V"},
+		{4, "IV", "(V-I)"},
+		{1, "I", "I"},
+	}
+
+	var roman strings.Builder
+	var calc []string
+	remaining := n
+	for _, v := range vals {
+		for remaining >= v.val {
+			roman.WriteString(v.sym)
+			calc = append(calc, v.dispSym)
+			remaining -= v.val
+		}
+	}
+
+	// Build calc
